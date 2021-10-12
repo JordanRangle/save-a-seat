@@ -1,0 +1,50 @@
+<div class="seat-select-wpr">
+    <div class="select-date">
+        <!-- <label for="date">Select a date</label>
+        <input type="date" name="date" id="date" [value]="tomorrow | date: 'yyyy-MM-dd'"> -->
+
+        <mat-form-field appearance="fill">
+            <mat-label>Choose a date</mat-label>
+            <input matInput [matDatepicker]="picker" (dateChange)="dateChange($event)" [value]="tomorrow" [min]="minDate" [max]="maxDate">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <!-- [startAt]="testDate"  -->
+
+        <!-- <button mat-button>Basic</button>
+        <button mat-button color="primary">Primary</button>
+        <button mat-button color="accent">Accent</button>
+        <button mat-button disabled>Disabled</button> -->
+
+    </div>
+    <div class="seats" *ngIf="selectedDate >= minDate && selectedDate <= maxDate">
+        <div class="available-seats">
+            <h3>Available Seats</h3>
+            <!-- <select name="seats" id="seats"></select> -->
+            <div *ngFor="let date of dates">
+                <div *ngIf="date.date === (selectedDate | date: 'yyyy-MM-dd')">
+                    <div *ngIf="!date.available.length">There are no available seats to book on this day</div>
+                    <div *ngIf="date.available.length">
+                        <button *ngFor="let seat of date.available" mat-button (click)="bookSeat(seat)">{{seat.name}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="booked-seats">
+            <h3>Booked Seats</h3>
+            <div *ngFor="let date of dates">
+                <div *ngIf="date.date === (selectedDate | date: 'yyyy-MM-dd')">
+                    <div *ngIf="!date.booked.length">There are no booked seats to book on this day</div>
+                    <div *ngIf="date.booked.length">
+                        <button *ngFor="let seat of date.booked" mat-button (click)="cancelSeat(seat)">{{seat.name}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div *ngIf="selectedDate < minDate || selectedDate > maxDate">
+        <p>Choose a date within the date range</p>
+    </div>
+</div>
