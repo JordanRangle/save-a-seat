@@ -1,50 +1,53 @@
 <div class="seat-select-wpr">
-    <div class="select-date">
-        <!-- <label for="date">Select a date</label>
-        <input type="date" name="date" id="date" [value]="tomorrow | date: 'yyyy-MM-dd'"> -->
-
+    <h2 *ngIf="!editBooking.id">Find a Seat</h2>
+    <h2 *ngIf="editBooking.id">Change Seat</h2>
+    <div *ngIf="showDateError" class="error">
+        <p>Choose a date within the date range</p>
+    </div>
+    <p class="error" *ngIf="errorMsg.length">{{errorMsg}}</p>
+    <form [formGroup]="seatSelectForm">
         <mat-form-field appearance="fill">
-            <mat-label>Choose a date</mat-label>
-            <input matInput [matDatepicker]="picker" (dateChange)="dateChange($event)" [value]="tomorrow" [min]="minDate" [max]="maxDate">
+            <mat-label *ngIf="!editBooking.id">Choose a date</mat-label>
+            <mat-label *ngIf="editBooking.id">Your booking date</mat-label>
+            <input matInput [matDatepicker]="picker" (dateChange)="dateChange($event)" [value]="tomorrow" [min]="minDate"
+                [max]="maxDate" formControlName="date" [disabled]="editBooking.id">
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
 
-        <!-- [startAt]="testDate"  -->
+        <p class="warn" *ngIf="selectedDate && !selectedDate.available.length">There are no seats avilable to book on this day.</p>
+        <p *ngIf="editBooking.id">Your current seat is {{editBooking.seat}}</p>
+        <mat-form-field appearance="fill">
+            <mat-label *ngIf="!editBooking.id">Select a seat</mat-label>
+            <mat-label *ngIf="editBooking.id">Select a new seat</mat-label>
+            <mat-select formControlName="seat" (selectionChange)="seatChange($event)" [disabled]="seatSelectForm.controls.date.status === 'INVALID' || (selectedDate && !selectedDate.available.length)">
+                <!-- <mat-option>--</mat-option> -->
+                <mat-option *ngFor="let seat of selectedDate.available" [value]="seat">
+                    {{seat.name}}
+                </mat-option>
+            </mat-select>
+            <!-- <mat-error *ngIf="seat.hasError('required')"></mat-error> -->
+            <!-- <mat-hint>{{seat.value?.sound}}</mat-hint> -->
+        </mat-form-field>
+    </form>
 
-        <!-- <button mat-button>Basic</button>
-        <button mat-button color="primary">Primary</button>
-        <button mat-button color="accent">Accent</button>
-        <button mat-button disabled>Disabled</button> -->
-
-    </div>
-    <div class="seats" *ngIf="selectedDate >= minDate && selectedDate <= maxDate">
-        <div class="available-seats">
-            <h3>Available Seats</h3>
-            <!-- <select name="seats" id="seats"></select> -->
-            <div *ngFor="let date of dates">
-                <div *ngIf="date.date === (selectedDate | date: 'yyyy-MM-dd')">
-                    <div *ngIf="!date.available.length">There are no available seats to book on this day</div>
-                    <div *ngIf="date.available.length">
-                        <button *ngFor="let seat of date.available" mat-button (click)="bookSeat(seat)">{{seat.name}}</button>
-                    </div>
-                </div>
-            </div>
+    <button *ngIf="!editBooking.id" mat-raised-button color="primary" (click)="confirmBooking()" [disabled]="seatSelectForm.status === 'INVALID'">Book Seat</button>
+    <button *ngIf="editBooking.id" mat-raised-button color="primary" (click)="updateBooking()"
+        [disabled]="seatSelectForm.status === 'INVALID'">Update Booking</button>
+    
+    <ng-template #confirmationDialog>
+        <h1 mat-dialog-title>Success!</h1>
+        <div mat-dialog-content>You've successfully booked a seat.</div>
+        <div mat-dialog-actions>
+            <button mat-button mat-dialog-close>Back to Dashboard</button>
         </div>
-        <div class="booked-seats">
-            <h3>Booked Seats</h3>
-            <div *ngFor="let date of dates">
-                <div *ngIf="date.date === (selectedDate | date: 'yyyy-MM-dd')">
-                    <div *ngIf="!date.booked.length">There are no booked seats to book on this day</div>
-                    <div *ngIf="date.booked.length">
-                        <button *ngFor="let seat of date.booked" mat-button (click)="cancelSeat(seat)">{{seat.name}}</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    </ng-template>
 
-    </div>
-    <div *ngIf="selectedDate < minDate || selectedDate > maxDate">
-        <p>Choose a date within the date range</p>
-    </div>
+    <ng-template #updateDialog>
+        <h1 mat-dialog-title>Success!</h1>
+        <div mat-dialog-content>You've successfully changed your seat.</div>
+        <div mat-dialog-actions>
+            <button mat-button mat-dialog-close>Back to Dashboard</button>
+        </div>
+    </ng-template>
 </div>

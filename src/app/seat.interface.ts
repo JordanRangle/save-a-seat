@@ -1,4 +1,5 @@
 export interface Seat {
     id: number,
-    name: string
+    name: string,
+    seat: number
 }

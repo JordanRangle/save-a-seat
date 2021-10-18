@@ -1,0 +1,43 @@
+.dashboard-wpr {
+
+    .dashboard-top {
+        display: flex;
+        flex-direction: column;
+        border-bottom: 1px solid black;
+        margin: 0 0 15px;
+
+        @media screen and (min-width:768px) {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items:flex-start;
+        }
+    }
+    .actions {
+        text-align: right;
+    }
+    .bookings {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+
+        .booking {
+            border: 1px solid slategray;
+            border-radius: 3px;
+            padding:10px;
+
+            .date {
+                font-weight: bold;
+                font-size:1.2em;
+            }
+            .seat {
+                margin:10px 0;
+                text-align: center;
+            }
+            .controls {
+                display:flex;
+                justify-content: center;
+                border-top: 1px solid;
+            }
+        }
+    }
+}

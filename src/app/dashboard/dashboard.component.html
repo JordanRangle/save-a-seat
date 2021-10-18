@@ -1,0 +1,44 @@
+<div class="dashboard-wpr">
+    <div class="dashboard-top">
+        <h2>Your Dashboard</h2>
+        <!-- <p>Welcome {{username}}</p> -->
+        <!-- <button mat-stroked-button color="primary" routerLink="/login">Log out</button> -->
+        <div class="actions">
+            <!-- <button mat-raised-button color="primary" routerLink="/seat-select">Save a Seat</button> -->
+            <button mat-mini-fab color="primary" aria-label="book a seat" routerLink="/seat-select">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <h3>Your bookings</h3>
+    <p class="warn" *ngIf="!bookings.length">Do you not have any bookings.</p>
+    <div class="bookings">
+        <div class="booking" *ngFor="let booking of bookings">
+            <div class="date">{{booking.date | date: 'fullDate'}}</div>
+            <div class="seat">Seat #{{booking.seat}}</div>
+            <div class="controls">
+                <button mat-button color="primary" (click)="editBooking(booking)">Edit <!--<mat-icon>edit</mat-icon>--></button>
+                <button mat-button color="primary" (click)="showCancelDialog(booking)">Cancel <!--<mat-icon>delete</mat-icon>--></button>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #cancelDialog>
+        <h1 mat-dialog-title>Cancel Booking</h1>
+        <div mat-dialog-content>Are you sure you want to cancel your booking?</div>
+        <div mat-dialog-actions>
+            <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Yes</button>
+            <button mat-button mat-dialog-close>No</button>
+
+            <!-- <button mat-button mat-dialog-close>No Thanks</button>
+            <button mat-button (click)="confirmCancel()" cdkFocusInitial>Ok</button> -->
+        </div>
+    </ng-template>
+
+    <!-- <ul>
+        list of cats
+        <li *ngFor="let cat of testAny.cats">{{cat.name}}</li>
+    </ul>
+    <button type="button" (click)="createCat()">insert a cat</button> -->
+</div>

@@ -1,0 +1,30 @@
+.login-wpr {
+    width:300px;
+    margin:0 auto;
+
+    .login, .signup {
+        display:flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    h2 {
+
+    }
+    .error {
+        margin-bottom:15px;
+        color:red;
+    }
+    form {
+        display:flex;
+        flex-direction: column;
+    }
+    p {
+        margin-top:15px;
+        text-align: center;
+    }
+    a {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+}

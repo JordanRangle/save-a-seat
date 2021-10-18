@@ -1,0 +1,11 @@
+.seat-select-wpr {
+    width:300px;
+    display:flex;
+    flex-direction: column;
+    margin:0 auto;
+
+    form {
+        display: flex;
+        flex-direction: column;
+    }
+}

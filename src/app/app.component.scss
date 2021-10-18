@@ -1,0 +1,26 @@
+.wpr {
+    width: 100%;
+    height:100%;
+    display: flex;
+    flex-direction: column;
+
+    .content {
+        flex-grow: 2;
+        width: 100%;
+        padding:20px;
+    }
+    footer {
+        padding:10px 20px;
+        background-color: darkslategrey;
+        text-align: center;
+        color: whitesmoke;
+    }
+
+    @media screen and (min-width:768px) {
+        .content {
+            max-width:900px;
+            margin:0 auto;
+            padding: 80px 20px;
+        }
+    }
+}

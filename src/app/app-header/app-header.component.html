@@ -1,0 +1,11 @@
+<header>
+    <div class="header-left"></div>
+    <div class="title">
+        <h1>{{title}}</h1>
+    </div>
+    <div class="header-right">
+        <a routerLink="/dashboard" *ngIf="isUserLoggedIn">Dashboard</a>
+        <a (click)="logout()" *ngIf="isUserLoggedIn">Logout</a>
+        <!-- <a routerLink="/login" *ngIf="isUserLoggedIn">Logout</a> hide if user is logged out -->
+    </div>
+</header>

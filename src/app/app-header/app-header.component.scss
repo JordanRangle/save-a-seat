@@ -1,0 +1,35 @@
+header {
+    background: #3f51b5;
+    padding:10px 20px;
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    color:#FFF;
+    height:60px;
+
+    a {
+        color:#FFF;
+        text-decoration: none;
+        padding:10px 0;
+    }
+    .title {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        h1 {
+            font-family: 'Andada Pro', serif;
+            font-size:2.2rem;
+            margin:0;
+        }
+    }
+    .header-right {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 20px; 
+
+        a {
+            cursor: pointer;
+        }
+    }
+}
