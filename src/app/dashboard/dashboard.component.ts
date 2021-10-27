@@ -4,7 +4,7 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { AppDate } from '../appDate.interface';
 import { Booking } from '../booking.interface';
 import * as datefns from 'date-fns';
-import { AuthService } from '../login.service';
+import { AuthService } from '../auth.service';
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({

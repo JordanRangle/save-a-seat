@@ -1,26 +1,27 @@
 <div class="login-wpr">
-    <div class="login" *ngIf="!signup">
+    <amplify-authenticator *ngIf="authState !== 'signedin'"></amplify-authenticator>
+
+
+    <!-- <div class="login" *ngIf="isLoginMode" style="display:none;">
         <h2>Log in</h2>
         <span class="error" *ngIf="loginError.length">{{loginError}}</span>
         <form [formGroup]="loginForm">
             <mat-form-field class="example-full-width" appearance="fill">
                 <mat-label>Email</mat-label>
-                <input matInput placeholder="user@email.com" value="email" formControlName="email">
+                <input matInput type="email" placeholder="user@email.com" value="email" formControlName="email">
             </mat-form-field>
 
             <mat-form-field class="example-full-width" appearance="fill">
                 <mat-label>Password</mat-label>
-                <input matInput type="password" placeholder="********" value="password" formControlName="password">
+                <input matInput type="password" placeholder="********" value="password" formControlName="password" minlength="6">
             </mat-form-field>
         </form>
-        <!-- <button mat-raised-button color="primary" routerLink="/dashboard">Log in</button> -->
-        <button mat-raised-button color="primary" (click)="userLogin()">Log in</button>
+        <button mat-raised-button color="primary" (click)="userLogin()" type="submit" [disabled]="loginForm.status === 'INVALID'">Log in</button>
         <p>Don't have an account? <a (click)="showSignup()">Sign up</a></p> 
-        <!-- <button mat-raised-button color="primary" (click)="testLogin()">TEST Log in</button> -->
 
     </div>
 
-    <div class="signup" *ngIf="signup">
+    <div class="signup" *ngIf="!isLoginMode" style="display:none;">
         <h2>Sign Up</h2>
         <span class="error" *ngIf="loginError.length">{{loginError}}</span>
         <form [formGroup]="signupForm">
@@ -38,10 +39,10 @@
             </mat-form-field>
             <mat-form-field class="example-full-width" appearance="fill">
                 <mat-label>Password</mat-label>
-                <input matInput type="password" placeholder="********" value="password" formControlName="password">
+                <input matInput type="password" placeholder="********" value="password" formControlName="password" minlength="6">
             </mat-form-field>
         </form>
-        <button mat-raised-button color="primary" (click)="userSignup()">Sign up</button>
+        <button mat-raised-button color="primary" (click)="userSignup()" type="submit" [disabled]="loginForm.status === 'INVALID'">Sign up</button>
         <p>Or <a (click)="showLogin()">Log in</a> with your account</p>
-    </div>
+    </div> -->
 </div>

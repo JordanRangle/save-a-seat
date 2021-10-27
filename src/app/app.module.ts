@@ -21,16 +21,23 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
 
-import { LoginComponent } from './login/login.component';
+import { AuthComponent } from './auth/auth.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AppHeaderComponent } from './app-header/app-header.component';
 
+/* Add Amplify imports */
+import { AmplifyUIAngularModule } from '@aws-amplify/ui-angular';
+import Amplify from 'aws-amplify';
+import awsconfig from '../aws-exports';
+
+/* Configure Amplify resources */
+Amplify.configure(awsconfig);
 
 @NgModule({
   declarations: [
     AppComponent,
     SeatSelectComponent,
-    LoginComponent,
+    AuthComponent,
     DashboardComponent,
     AppHeaderComponent
   ],
@@ -50,7 +57,8 @@ import { AppHeaderComponent } from './app-header/app-header.component';
     MatSelectModule,
     MatIconModule,
     MatCardModule,
-    MatDialogModule
+    MatDialogModule,
+    AmplifyUIAngularModule
   ],
   providers: [],
   bootstrap: [AppComponent]

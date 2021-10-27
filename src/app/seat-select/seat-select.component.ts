@@ -1,12 +1,15 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { SeatBookingService } from './../seat-booking.service';
-import { Seat } from './../seat.interface';
+// import { Seat } from './../seat.interface';
 import { AppDate } from './../appDate.interface';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import * as datefns from 'date-fns';
 import { AppServiceService } from '../app-service.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+// Amplify
+import { DataStore } from '@aws-amplify/datastore';
+import { Seat } from '../../models';
 
 @Component({
   selector: 'app-seat-select',
@@ -33,6 +36,9 @@ export class SeatSelectComponent implements OnInit {
     date: new FormControl(this.tomorrow, Validators.required),
     seat: new FormControl(null, Validators.required),
   });
+
+  //Amplify
+  dataStore: any = DataStore;
 
   constructor(private service: AppServiceService, private seatBookingService: SeatBookingService, private dialog: MatDialog, private router: Router, private activatedRoute: ActivatedRoute) { }
   
@@ -187,40 +193,11 @@ export class SeatSelectComponent implements OnInit {
     })
   }
   
-
-  // OLD
-  bookSeat(selectedSeat:Seat) {    
-    const selectedDateIndex = this.dates.findIndex(date => {
-      const dateFormat = datefns.format(this.selectedDate, 'yyyy-MM-dd');
-      return date.date === dateFormat;
-    })
-
-    // find and remove seat from available array
-    const seatToBookIndex = this.dates[selectedDateIndex].available.findIndex(seat => {
-      return seat === selectedSeat;
-    });
-    this.dates[selectedDateIndex].available.splice(seatToBookIndex, 1);
-
-    // push to booked array
-    this.dates[selectedDateIndex].booked.push(selectedSeat);
-    this.dates[selectedDateIndex].booked.sort((a, b) => a.id > b.id ? 1 : -1);
+  // Amplify
+  getGQL() {
+    const models = this.dataStore.query(Seat);
+    console.log('get seats', models);
   }
-
-  cancelSeat(selectedSeat:Seat) {
-    const selectedDateIndex = this.dates.findIndex(date => {
-      const dateFormat = datefns.format(this.selectedDate.date, 'yyyy-MM-dd');
-      return date.date === dateFormat;
-    })
-
-    // find and remove seat from booked array
-    const seatToCancelIndex = this.dates[selectedDateIndex].booked.findIndex(seat => {
-      return seat === selectedSeat;
-    });
-    this.dates[selectedDateIndex].booked.splice(seatToCancelIndex, 1);
-
-    // push to available array
-    this.dates[selectedDateIndex].available.push(selectedSeat);
-    this.dates[selectedDateIndex].available.sort((a, b) => a.id > b.id ? 1 : -1);
-  }
+  
 
 }

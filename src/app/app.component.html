@@ -1,8 +1,21 @@
 <div class="wpr">
   <app-app-header></app-app-header>
+
   <div class="content">
+    <!-- <button type="button" (click)="test()">TEST</button>
+    <button type="button" (click)="postFunc()">Post a Seat</button>  
+    <button type="button" (click)="generateSeats()">Generate 20 seats</button> 
+    <button type="button" (click)="getfunc()">GET seats</button>
+    <br><br> -->
+    <!-- <amplify-authenticator *ngIf="authState !== 'signedin'"></amplify-authenticator>
+    
+    <div *ngIf="authState === 'signedin' && user" class="App">
+      <amplify-sign-out></amplify-sign-out>
+      <div>Hello, {{user.email}}</div>
+    </div> -->
     <router-outlet></router-outlet>
   </div>
+
   <footer>
     &copy; Save a Seat Inc. 2021
   </footer>
