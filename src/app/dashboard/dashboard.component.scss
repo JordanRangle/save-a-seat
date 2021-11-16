@@ -16,14 +16,15 @@
         text-align: right;
     }
     .bookings {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
 
         .booking {
             border: 1px solid slategray;
             border-radius: 3px;
             padding:10px;
+            text-align: center;
 
             .date {
                 font-weight: bold;
@@ -31,7 +32,6 @@
             }
             .seat {
                 margin:10px 0;
-                text-align: center;
             }
             .controls {
                 display:flex;

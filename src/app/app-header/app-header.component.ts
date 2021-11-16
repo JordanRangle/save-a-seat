@@ -1,6 +1,6 @@
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, NgZone, OnDestroy, OnInit, ɵisListLikeIterable } from '@angular/core';
 // Amplify
 import { onAuthUIStateChange, CognitoUserInterface, AuthState } from '@aws-amplify/ui-components';
 import { Hub } from 'aws-amplify';
@@ -23,47 +23,25 @@ export class AppHeaderComponent implements OnInit, OnDestroy {
   private userSub!: Subscription;
   isAuthenticated: boolean = false;
   // test
-  private authState!: Subscription;
+  authSub: Subscription;
 
   constructor(private authService: AuthService, private router: Router) {
-    Hub.listen('auth', (data) => {
-      const { payload } = data;
-      this.onAuthEvent(payload);
-      // console.log('A new auth event has happened: ', data.payload.data.username + ' has ' + data.payload.event);
+    this.authSub = this.authService.authState.subscribe(val => {
+      this.isAuthenticated = val;
+      // console.log('Is in angular zone?', NgZone.isInAngularZone())
     });
   }
 
-  ngOnInit(): void {
-    // subscribe to "user" in auth service
-    this.userSub = this.authService.user.subscribe(user => {
-      // this.isAuthenticated = !user ? false : true;
-      this.isAuthenticated = !!user;
-      console.log('isAuthenticated', this.isAuthenticated);
-      
-    })
-
-    // test
-    this.authState = this.authService.authState.subscribe(state => {
-      this.isAuthenticated = state;
-    });
-    // test end
-  }
-
-  onAuthEvent(payload:HubPayload) {
-    // ... your implementation
-    console.log('*** app-header onAuthEvent ***', payload);
-    
-  }
+  ngOnInit(): void {}
 
   logout() { 
-    this.isUserLoggedIn = false;
-    sessionStorage.clear();
+    this.isAuthenticated = false;
+    // sessionStorage.clear();
     this.router.navigate(['/login']);
   }
 
   ngOnDestroy() {
-    this.userSub.unsubscribe();
-
-    this.authState.unsubscribe();
+    // this.userSub.unsubscribe();
+    this.authSub.unsubscribe();
   }
 }

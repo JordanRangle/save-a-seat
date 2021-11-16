@@ -11,11 +11,11 @@
         </div>
     </div>
 
-    <h3>Your bookings</h3>
-    <p class="warn" *ngIf="!bookings.length">Do you not have any bookings.</p>
-    <div class="bookings">
-        <div class="booking" *ngFor="let booking of bookings">
-            <div class="date">{{booking.date | date: 'fullDate'}}</div>
+    <h3>Your bookings ({{myBookings.length}})</h3>
+    <p class="warn" *ngIf="!myBookings.length">Do you not have any bookings.</p>
+    <div class="bookings" *ngIf="myBookings.length">
+        <div class="booking" *ngFor="let booking of myBookings">
+            <div class="date">{{booking.date | date: 'EEEE, LLLL d'}}</div>
             <div class="seat">Seat #{{booking.seat}}</div>
             <div class="controls">
                 <button mat-button color="primary" (click)="editBooking(booking)">Edit <!--<mat-icon>edit</mat-icon>--></button>

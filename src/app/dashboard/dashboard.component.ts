@@ -1,3 +1,4 @@
+import { DataStore } from '@aws-amplify/datastore';
 import { SeatBookingService } from './../seat-booking.service';
 import { Router } from '@angular/router';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
@@ -6,6 +7,9 @@ import { Booking } from '../booking.interface';
 import * as datefns from 'date-fns';
 import { AuthService } from '../auth.service';
 import { MatDialog } from '@angular/material/dialog';
+import { Seat, Bookings } from 'src/models';
+import { ampSeat, BookingInterface } from '../seat.interface';
+import Auth from '@aws-amplify/auth';
 
 @Component({
   selector: 'app-dashboard',
@@ -19,11 +23,20 @@ export class DashboardComponent implements OnInit {
   @ViewChild('cancelDialog') cancelDialogTemplate!: TemplateRef<any>;
   bookingToCancel!: Booking; 
 
+  //Amplify
+  dataStore = DataStore;
+  ampSeats: Seat[] = [];
+  myBookings: any = [];
+  currentUser: any = '';
+
   constructor(private authService: AuthService, private router: Router, private seatBookingService: SeatBookingService, private dialog: MatDialog) {
   }
 
   ngOnInit(): void {
-    this.getUserBookings();
+    this.getUser();
+
+    // BELOW OLD CODE
+    // this.getUserBookings();
 
     // fake bookings data
     // for (let i = 1; i < 4; i++) {
@@ -35,19 +48,29 @@ export class DashboardComponent implements OnInit {
     // }
   }
 
-  getUserBookings() {
-    if (!sessionStorage.userID) {
-      // can't find user ID - redirect back to login
-      this.router.navigate(['login']);
-    }
-    else {
-      this.authService.getUserBookings(sessionStorage.userID).subscribe(res => {
-        sessionStorage.setItem('bookings', JSON.stringify(res));
-        this.bookings = res;
-      }, error => {
-        console.log('getUser error', error.error);
-      });
-    }
+  getUser() {
+    Auth.currentAuthenticatedUser().then(user => {
+      this.currentUser = user.username;
+      // this.getSeats();
+      this.getBookings();
+    });
+  }
+
+  async getSeats() {
+    await DataStore.query(Seat).then(seats => {
+      this.ampSeats = seats.sort((a, b) => a.seatNumber > b.seatNumber ? 1 : -1);
+
+    }).catch((err: any) => {
+      console.log('Query Seats error', err);
+    });
+  }
+
+  getBookings() {
+    this.dataStore.query(Bookings).then((bookings: BookingInterface[]) => {
+      
+      this.myBookings = bookings.filter(booking => booking.user === this.currentUser);
+      console.log('my bookings', this.myBookings);
+    })
   }
 
   editBooking(booking:any) {
@@ -56,10 +79,15 @@ export class DashboardComponent implements OnInit {
 
   cancelBooking(booking:any) {
     this.seatBookingService.cancelBooking(booking.date, booking.id).subscribe(res => {
-      this.getUserBookings();
+      this.getBookings();
     }, error => {
       console.log('cancel booking error', error);
     })
+  }
+
+  async deleteFunc(booking: BookingInterface) {
+    // const modelToDelete: any = await DataStore.query(Bookings, booking);
+    // DataStore.delete(modelToDelete);
   }
 
   showCancelDialog(booking: Booking) {
@@ -71,14 +99,4 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
-
-  // declineCancel(): void {
-  //   this.dialog.close(this.cancelDialogTemplate);
-  //   this.cancelDialogTemplate.close();
-  // }
-
-  // confirmCancel(): void {
-  //   this.cancelDialogTemplate.show();
-  // }
-
 }

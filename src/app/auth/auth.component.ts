@@ -41,9 +41,7 @@ export class AuthComponent implements OnInit {
     //   this.authState = authState;
     //   this.user = authData as CognitoUserInterface;
     //   this.ref.detectChanges();
-    // });
-    console.log('TESTTESTTEST', this.authState);
-    
+    // });   
   }
 
   ngOnDestroy() {

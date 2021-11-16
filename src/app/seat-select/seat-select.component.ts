@@ -1,6 +1,6 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { SeatBookingService } from './../seat-booking.service';
-// import { Seat } from './../seat.interface';
+// import { Seat, BookingInterface } from './../seat.interface';
 import { AppDate } from './../appDate.interface';
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import * as datefns from 'date-fns';
@@ -9,7 +9,9 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 // Amplify
 import { DataStore } from '@aws-amplify/datastore';
-import { Seat } from '../../models';
+import { Bookings, Seat } from '../../models';
+import { ampSeat, BookingInterface } from '../seat.interface';
+import { Auth } from 'aws-amplify';
 
 @Component({
   selector: 'app-seat-select',
@@ -37,89 +39,104 @@ export class SeatSelectComponent implements OnInit {
     seat: new FormControl(null, Validators.required),
   });
 
+
   //Amplify
   dataStore: any = DataStore;
+  ampSeats: ampSeat[] = [];
+  allBookings: BookingInterface[] = [];
 
   constructor(private service: AppServiceService, private seatBookingService: SeatBookingService, private dialog: MatDialog, private router: Router, private activatedRoute: ActivatedRoute) { }
   
   ngOnInit(): void {
-    // Generate fake data for the DB
-    // this.generateDates();
-    
     // watch for edit booking params
     this.activatedRoute.params.subscribe((params: any) => {
-      if (params.id) {
-        console.log(params);
+      if (params.date && params.seatNumber) {
         this.editBooking = params;
-        const dateTime = params.date + 'T00:00:00';
+        const dateTime = new Date(params.date + 'T00:00:00');
         this.seatSelectForm.controls.date.setValue(dateTime);
-        // this.seatSelectForm.controls.seat.setValue(parseInt(params.seat));
-        this.getAvailableSeats(params.date);
       }
-      else {
-        this.getAvailableSeats(datefns.format(this.tomorrow, 'yyyy-MM-dd'));
-      }
+    });
+
+    this.getSeats();
+    this.getBookings();
+  }
+
+  // ****************************
+  // Amplify Start
+  // ****************************
+
+  getSeats() {
+    this.dataStore.query(Seat).then((seats: ampSeat[]) => {
+      // any checks on the user if needed - not sure if AWS just throws an error if they are not logged in, or returns an object with information saying not logged in        
+      this.ampSeats = seats.sort((a, b) => a.seatNumber > b.seatNumber ? 1 : -1);
+    }).catch((err: any) => {
+      console.log('Query Seats error', err);
     });
   }
 
-  getAvailableSeats(date: string) {  
-    this.errorMsg = '';
-    this.seatBookingService.getAvailableSeats(date).subscribe((success) => {
-      this.selectedDate = success;
-    }, (error) => {
-      this.errorMsg = error.error;
-    });
-  }
-
-  getDates() {
-    this.errorMsg = '';
-    this.service.getDates().subscribe((response: any) => {
-      this.dates = response.data;
-
-    }, (error: any) => {
-      this.errorMsg = error.error;
+  getBookings() {
+    this.dataStore.query(Bookings).then((bookings: BookingInterface[]) => {
+      this.allBookings = bookings;
     })
   }
 
-  // Temp until dates DB is created
-  generateSeats() {
-    let tmpAvailSeats = [];
-    let tmpBookedSeats = [];
-
-    // create all available seats
-    for (let i = 1; i <= 20; i++) {
-      tmpAvailSeats.push({
-        id: i,
-        name: `Seat #${i}`,
-        seat: i,
-        userID: 0
-      });
-    }    
-    // randomly move seats to the booked array
-    const numOfBookedSeats = Math.floor(Math.random() * 20);
-    for (let i = 0; i < numOfBookedSeats; i++) {
-      let randomSeat = Math.floor(Math.random() * (tmpAvailSeats.length - 1));
-      tmpAvailSeats[randomSeat].userID = Math.floor(Math.random() * 150);
-      tmpBookedSeats.push(tmpAvailSeats.splice(randomSeat, 1)[0]);
-    }
-
-    tmpBookedSeats.sort((a, b) => a.id > b.id ? 1 : -1);
-    return { tmpAvailSeats, tmpBookedSeats };
+  async postFunc() {
+    await DataStore.save(new Seat({
+      seatNumber: 1,
+    }))
   }
 
-  // Temp until dates DB is created
-  generateDates() {
-    for (let i = 0; i < 30; i++) {
-      const tmpSeats = this.generateSeats();
-      const tmpDate = datefns.addDays(this.tomorrow, i)
-      this.dates.push({
-        date: datefns.format(tmpDate, 'yyyy-MM-dd'),
-        available: tmpSeats.tmpAvailSeats,
-        booked: tmpSeats.tmpBookedSeats
-      });
-    }
-    console.log('generateDates()', this.dates);
+  async postBooking() {
+    if (!this.seatSelectForm.value.seat) return;
+    
+    Auth.currentAuthenticatedUser().then(user => {
+      console.log('post booking', datefns.format(this.seatSelectForm.value.date, 'yyyy-MM-dd'), this.seatSelectForm.value.seat.seatNumber, user.username);
+      DataStore.save(new Bookings({
+        date: datefns.format(this.seatSelectForm.value.date, 'yyyy-MM-dd'),
+        seat: this.seatSelectForm.value.seat.seatNumber,
+        user: user.username
+      }))
+    })
   }
+
+  async putFunc() {
+    if (!this.seatSelectForm.value.seat) return;
+    /* Models in DataStore are immutable. To update a record you must use the copyOf function
+ to apply updates to the item’s fields rather than mutating the instance directly */
+
+    Auth.currentAuthenticatedUser().then(user => {
+      DataStore.save(Seat.copyOf(this.seatSelectForm.value.seat, item => {
+        // item.bookings?.push({
+        //   date: datefns.format(this.seatSelectForm.value.date, 'yyyy-MM-dd'),
+        //   user: user.username
+        // })
+      }));
+
+      this.showConfirmDialog();
+    })
+
+    // this.dataStore.save(Seat.copyOf(this.seatSelectForm.value.seat, item => {
+      // item.bookings?.push({date: datefns.format(this.seatSelectForm.value.date, 'yyyy-MM-dd'), userID: })
+    // }));
+
+    // Auth.currentAuthenticatedUser().then(console.log);
+  }
+
+  async deleteFunc() {
+    if (!this.seatSelectForm.value.seat) return;
+
+    const modelToDelete:any = await DataStore.query(Seat, this.seatSelectForm.value.seat.id);
+    DataStore.delete(modelToDelete);
+  }
+
+  getfunc() {
+    const models = this.dataStore.query(Seat);
+    console.log('get seats', models);
+  }
+
+  // ****************************
+  // Amplify End
+  // ****************************
 
   dateChange(event: any) {
     // reset date error    
@@ -137,7 +154,7 @@ export class SeatSelectComponent implements OnInit {
     }
     else {
       // call end point if date is valid
-      this.getAvailableSeats(datefns.format(event.value, 'yyyy-MM-dd'));
+      // this.getAvailableSeats(datefns.format(event.value, 'yyyy-MM-dd'));
     }    
   }
 
@@ -175,13 +192,40 @@ export class SeatSelectComponent implements OnInit {
 
   updateBooking() {
     console.log('update booking', this.seatSelectForm);
-    this.errorMsg = '';
-    this.seatBookingService.updateBooking(this.editBooking.date, sessionStorage.userID, this.editBooking.seat, this.seatSelectForm.value.seat.id,).subscribe((response: any) => {
-      // show confirmation dialog
-      this.showUpdateDialog();
-    }, (error: any) => {
-      this.errorMsg = error.error;
-    })
+    // this.errorMsg = '';
+    // this.seatBookingService.updateBooking(this.editBooking.date, sessionStorage.userID, this.editBooking.seat, this.seatSelectForm.value.seat.id,).subscribe((response: any) => {
+    //   // show confirmation dialog
+    //   this.showUpdateDialog();
+    // }, (error: any) => {
+    //   this.errorMsg = error.error;
+    // })
+
+    if (!this.seatSelectForm.value.seat) return;
+    /* Models in DataStore are immutable. To update a record you must use the copyOf function
+ to apply updates to the item’s fields rather than mutating the instance directly */
+
+    let bookingToMove: Bookings;
+    // let currentUser = "";
+    Auth.currentAuthenticatedUser().then(user => {
+      DataStore.save(Seat.copyOf(this.seatSelectForm.value.seat, item => {
+        // const bookingIndex = item.bookings?.findIndex(booking => booking.date === datefns.format(this.editBooking.date, 'yyyy-MM-dd'));
+        // if (item.bookings && bookingIndex) {
+        //   bookingToMove = item.bookings?.splice(bookingIndex, 1)[0];
+        // }
+        })
+      ).then(success => {
+        this.ampSeats.forEach(seat => {
+          if (seat.seatNumber === this.editBooking.seatNumber) {
+
+            // DataStore.save(Seat.copyOf(seat, item => {
+            //   item.bookings?.push(bookingToMove)
+            // }))
+          }
+        });
+      })
+    });
+
+    this.showUpdateDialog();
   }
 
   showUpdateDialog() {
@@ -192,12 +236,4 @@ export class SeatSelectComponent implements OnInit {
       this.router.navigate(['dashboard']);
     })
   }
-  
-  // Amplify
-  getGQL() {
-    const models = this.dataStore.query(Seat);
-    console.log('get seats', models);
-  }
-  
-
 }

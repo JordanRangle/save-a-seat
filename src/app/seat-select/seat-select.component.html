@@ -1,39 +1,61 @@
 <div class="seat-select-wpr">
-    <h2 *ngIf="!editBooking.id">Find a Seat</h2>
-    <h2 *ngIf="editBooking.id">Change Seat</h2>
+    <h2 *ngIf="!editBooking.seatNumber">Find a Seat</h2>
+    <h2 *ngIf="editBooking.seatNumber">Change Seat</h2>
     <div *ngIf="showDateError" class="error">
         <p>Choose a date within the date range</p>
     </div>
     <p class="error" *ngIf="errorMsg.length">{{errorMsg}}</p>
     <form [formGroup]="seatSelectForm">
         <mat-form-field appearance="fill">
-            <mat-label *ngIf="!editBooking.id">Choose a date</mat-label>
-            <mat-label *ngIf="editBooking.id">Your booking date</mat-label>
+            <mat-label *ngIf="!editBooking.seatNumber">Choose a date</mat-label>
+            <mat-label *ngIf="editBooking.seatNumber">Your booking date</mat-label>
             <input matInput [matDatepicker]="picker" (dateChange)="dateChange($event)" [value]="tomorrow" [min]="minDate"
-                [max]="maxDate" formControlName="date" [disabled]="editBooking.id">
+                [max]="maxDate" formControlName="date" [disabled]="editBooking.seatNumber">
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
 
-        <p class="warn" *ngIf="selectedDate && !selectedDate.available.length">There are no seats avilable to book on this day.</p>
-        <p *ngIf="editBooking.id">Your current seat is {{editBooking.seat}}</p>
-        <mat-form-field appearance="fill">
+        <p class="warn" *ngIf="!ampSeats.length">There are no seats avilable to book on this day.</p>
+        <p *ngIf="editBooking.seatNumber">Your current seat is {{editBooking.seatNumber}}</p>
+        <!--<mat-form-field appearance="fill">
             <mat-label *ngIf="!editBooking.id">Select a seat</mat-label>
             <mat-label *ngIf="editBooking.id">Select a new seat</mat-label>
             <mat-select formControlName="seat" (selectionChange)="seatChange($event)" [disabled]="seatSelectForm.controls.date.status === 'INVALID' || (selectedDate && !selectedDate.available.length)">
-                <!-- <mat-option>--</mat-option> -->
+                <!-- <mat-option>--</mat-option> --
                 <mat-option *ngFor="let seat of selectedDate.available" [value]="seat">
                     {{seat.name}}
                 </mat-option>
             </mat-select>
+            <!-- <mat-error *ngIf="seat.hasError('required')"></mat-error> --
+            <!-- <mat-hint>{{seat.value?.sound}}</mat-hint> --
+        </mat-form-field>-->
+
+        <mat-form-field appearance="fill">
+            <mat-label *ngIf="!editBooking.seatNumber">Select a seat</mat-label>
+            <mat-label *ngIf="editBooking.seatNumber">Select a new seat</mat-label>
+            <mat-select formControlName="seat" (selectionChange)="seatChange($event)"
+                [disabled]="seatSelectForm.controls.date.status === 'INVALID'">
+                <mat-option *ngFor="let seat of ampSeats | seatFilter: allBookings: seatSelectForm.value.date" [value]="seat">
+                <!-- <mat-option *ngFor="let seat of ampSeats" [value]="seat"> -->
+                    Seat #{{seat.seatNumber}}
+                </mat-option>
+            </mat-select>
+
             <!-- <mat-error *ngIf="seat.hasError('required')"></mat-error> -->
             <!-- <mat-hint>{{seat.value?.sound}}</mat-hint> -->
         </mat-form-field>
+        
     </form>
 
-    <button *ngIf="!editBooking.id" mat-raised-button color="primary" (click)="confirmBooking()" [disabled]="seatSelectForm.status === 'INVALID'">Book Seat</button>
-    <button *ngIf="editBooking.id" mat-raised-button color="primary" (click)="updateBooking()"
+    <button *ngIf="!editBooking.seatNumber" mat-raised-button color="primary" (click)="postBooking()"
+        [disabled]="seatSelectForm.status === 'INVALID'">Book Seat</button>
+
+    <button *ngIf="editBooking.seatNumber" mat-raised-button color="primary" (click)="updateBooking()"
         [disabled]="seatSelectForm.status === 'INVALID'">Update Booking</button>
+    <!-- Testing buttons -->
+    <!-- <button mat-raised-button color="accent" (click)="postBooking()">postBooking()</button> -->
+    <!-- <button mat-raised-button color="primary" (click)="postFunc()">postFunc()</button> -->
+    <!-- <button mat-raised-button color="accent" (click)="deleteFunc()">deleteFunc()</button> -->
     
     <ng-template #confirmationDialog>
         <h1 mat-dialog-title>Success!</h1>

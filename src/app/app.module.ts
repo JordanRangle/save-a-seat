@@ -24,6 +24,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { AuthComponent } from './auth/auth.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AppHeaderComponent } from './app-header/app-header.component';
+import { SeatFilterPipe, HideBookedSeatPipe } from './seat-select/seat-filter.pipe';
 
 /* Add Amplify imports */
 import { AmplifyUIAngularModule } from '@aws-amplify/ui-angular';
@@ -39,7 +40,9 @@ Amplify.configure(awsconfig);
     SeatSelectComponent,
     AuthComponent,
     DashboardComponent,
-    AppHeaderComponent
+    AppHeaderComponent,
+    SeatFilterPipe,
+    HideBookedSeatPipe
   ],
   imports: [
     BrowserModule,
